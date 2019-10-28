@@ -1,9 +1,13 @@
 const axios = require('axios');
 const API_URL = 'https://api.github.com';
+const fellows = require('./private/fellows');
 
 const usersCommitsMap = {
   //username: [] Commits array
 }
+
+const usersLastCommits = []
+const commitsSortedByPushDate = []
 
 const getUserEvents = async (username) => {
   try {
@@ -35,15 +39,25 @@ const extractCommits = (username, events) => {
   return savedCommits;
 }
 
-const main = async () => {
-  try {
-    const username = 'AminesCodes'
-    let events = await getUserEvents(username)
-    let commits = await extractCommits(username, events)
-    console.log(commits[0])
-  } catch (err) {
-    throw err;
+const getClassCommits = async () => {
+  const usernames = fellows.map(fellow => fellow.gh_username)
+
+  for (user of usernames) {
+    try {
+      let events = await getUserEvents(user)
+      let commits = await extractCommits(user, events)
+      usersCommitsMap[user] = commits;
+
+      usersLastCommits.push(commits[0])
+    } catch (err) {
+      throw err;
+    }
   }
+}
+
+const main = async () => {
+  await getClassCommits();
+  console.log(usersLastCommits)
 }
 
 main();
