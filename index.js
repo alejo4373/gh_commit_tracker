@@ -1,63 +1,50 @@
 const axios = require('axios');
-const path = require('path');
-const git = require('nodegit');
-const auth = require('./secrets');
 const API_URL = 'https://api.github.com';
 
-const getForks = async (repo_url) => {
+const usersCommitsMap = {
+  //username: [] Commits array
+}
+
+const getUserEvents = async (username) => {
   try {
-    const res = await axios({
-      method: 'get',
-      baseURL: API_URL,
-      url: repo_url,
-      params: {
-        per_page: '100'
-      },
-      auth
-    })
-
-    let forks = res.data.map(fork => { 
-      return {
-        clone_url: fork.clone_url,
-        ownerLogin: fork.owner.login,
-       }
-    })
-
-    return forks
+    let { data } = await axios.get(`${API_URL}/users/${username}/events`)
+    return data;
   } catch (err) {
-    console.error(err)
+    console.log('ERROR =>', err)
   }
 }
 
-const cloneRepos = async (repos) => {
-  try {
-    let clonePromises = []
-    for(let repo of repos) {
-      const localPath = path.resolve(__dirname, 'forks', repo.ownerLogin);
-      clonePromises.push(git.Clone(repo.clone_url, localPath))
+const extractCommits = (username, events) => {
+  const pushEvents = events = events.filter(e => e.type === "PushEvent")
+  const savedCommits = [];
+
+  for (let event of pushEvents) {
+    let { commits } = event.payload
+
+    for (let commit of commits) {
+      const commitObj = {
+        repo: event.repo.name,
+        username: event.actor.display_login,
+        pushed_at: new Date(event["created_at"]),
+        message: commit.message,
+        sha: commit.sha
+      }
+      savedCommits.push(commitObj);
     }
-    let clonedRepos = await Promise.all(clonePromises)
-    return clonedRepos;
-  } catch (err) {
-    console.error(err)
   }
+  return savedCommits;
 }
 
 const main = async () => {
-  const repo = process.argv[2];
-  if (!repo) {
-    console.error('No repo name specified')
-    return;
-  }
-  
   try {
-    let forks = await getForks(`/repos/${repo}/forks`)
-    console.log(forks.length)
-    let clonedRepos = await cloneRepos(forks)
-    console.log('clonedRepos =>', clonedRepos.length)
+    const username = 'AminesCodes'
+    let events = await getUserEvents(username)
+    let commits = await extractCommits(username, events)
+    console.log(commits[0])
   } catch (err) {
     throw err;
   }
 }
 
 main();
+
