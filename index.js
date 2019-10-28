@@ -6,9 +6,6 @@ const usersCommitsMap = {
   //username: [] Commits array
 }
 
-const usersLastCommits = []
-const commitsSortedByPushDate = []
-
 const getUserEvents = async (username) => {
   try {
     let { data } = await axios.get(`${API_URL}/users/${username}/events`)
@@ -39,8 +36,17 @@ const extractCommits = (username, events) => {
   return savedCommits;
 }
 
+const sortCommitsByPushedDate = (commits) => {
+  const sortedCommits = [...commits].sort((c1, c2) => {
+    return c2.pushed_at - c1.pushed_at
+  })
+
+  return sortedCommits
+}
+
 const getClassCommits = async () => {
   const usernames = fellows.map(fellow => fellow.gh_username)
+  const usersLastCommits = []
 
   for (user of usernames) {
     try {
@@ -53,11 +59,14 @@ const getClassCommits = async () => {
       throw err;
     }
   }
+  return usersLastCommits;
 }
 
 const main = async () => {
-  await getClassCommits();
-  console.log(usersLastCommits)
+  const lastPushedCommits = await getClassCommits();
+
+  const commitsSorted = sortCommitsByPushedDate(lastPushedCommits)
+  console.log(commitsSorted.slice(0, 5))
 }
 
 main();
