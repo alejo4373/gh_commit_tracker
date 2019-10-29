@@ -22,6 +22,14 @@ app.use('*', (req, res) => {
   })
 })
 
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({
+    message: `${err.message}. See the server logs for more details`,
+    payload: null
+  })
+})
+
 app.listen(PORT, () => {
   console.log(`App running on PORT: ${PORT}`)
 })
