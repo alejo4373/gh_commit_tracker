@@ -1,73 +1,27 @@
-const axios = require('axios');
-const API_URL = 'https://api.github.com';
-const fellows = require('./private/fellows');
+const express = require('express');
+const { getClassCommits, sortCommitsByPushedDate } = require('./commits')
 
-const usersCommitsMap = {
-  //username: [] Commits array
-}
+const PORT = 3000;
+const app = express();
 
-const getUserEvents = async (username) => {
-  try {
-    let { data } = await axios.get(`${API_URL}/users/${username}/events`)
-    return data;
-  } catch (err) {
-    console.log('ERROR =>', err)
-  }
-}
-
-const extractCommits = (username, events) => {
-  const pushEvents = events = events.filter(e => e.type === "PushEvent")
-  const savedCommits = [];
-
-  for (let event of pushEvents) {
-    let { commits } = event.payload
-
-    for (let commit of commits) {
-      const commitObj = {
-        repo: event.repo.name,
-        username: event.actor.display_login,
-        pushed_at: new Date(event["created_at"]),
-        message: commit.message,
-        sha: commit.sha
-      }
-      savedCommits.push(commitObj);
-    }
-  }
-  return savedCommits;
-}
-
-const sortCommitsByPushedDate = (commits) => {
-  const sortedCommits = [...commits].sort((c1, c2) => {
-    return c2.pushed_at - c1.pushed_at
-  })
-
-  return sortedCommits
-}
-
-const getClassCommits = async () => {
-  const usernames = fellows.map(fellow => fellow.gh_username)
-  const usersLastCommits = []
-
-  for (user of usernames) {
-    try {
-      let events = await getUserEvents(user)
-      let commits = await extractCommits(user, events)
-      usersCommitsMap[user] = commits;
-
-      usersLastCommits.push(commits[0])
-    } catch (err) {
-      throw err;
-    }
-  }
-  return usersLastCommits;
-}
-
-const main = async () => {
+app.get('/commits', async (req, res) => {
   const lastPushedCommits = await getClassCommits();
 
   const commitsSorted = sortCommitsByPushedDate(lastPushedCommits)
-  console.log(commitsSorted.slice(0, 5))
-}
+  const mostRecentFive = commitsSorted.slice(0, 5)
+  res.json({
+    message: "Retrieved last 5 pushed commits",
+    payload: mostRecentFive
+  })
+})
 
-main();
+app.use('*', (req, res) => {
+  res.status(404).json({
+    message: "Not Found",
+    payload: null
+  })
+})
 
+app.listen(PORT, () => {
+  console.log(`App running on PORT: ${PORT}`)
+})
