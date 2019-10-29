@@ -1,6 +1,6 @@
 const axios = require('axios');
 const API_URL = 'https://api.github.com';
-const fellows = require('./private/fellows');
+const fellowsGHUsernames = require('./fellows_gh_usernames');
 
 const usersCommitsMap = {
   //username: [] Commits array
@@ -45,10 +45,9 @@ const sortCommitsByPushedDate = (commits) => {
 }
 
 const getClassCommits = async () => {
-  const usernames = fellows.map(fellow => fellow.gh_username)
   const usersLastCommits = []
 
-  for (user of usernames) {
+  for (user of fellowsGHUsernames) {
     try {
       let events = await getUserEvents(user)
       let commits = await extractCommits(user, events)
