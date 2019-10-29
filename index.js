@@ -1,8 +1,11 @@
 const express = require('express');
+const morgan = require('morgan');
 const { getClassCommits, sortCommitsByPushedDate } = require('./commits')
 
 const PORT = 3000;
 const app = express();
+
+app.use(morgan('common'));
 
 app.get('/commits', async (req, res) => {
   const lastPushedCommits = await getClassCommits();
