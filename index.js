@@ -7,6 +7,12 @@ const app = express();
 
 app.use(morgan('common'));
 
+// Enable CORS
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*")
+  next();
+})
+
 app.get('/commits', async (req, res) => {
   const lastPushedCommits = await getClassCommits();
 
