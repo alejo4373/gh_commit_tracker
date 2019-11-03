@@ -2,7 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const { getClassCommits, sortCommitsByPushedDate } = require('./commits')
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3100;
 const app = express();
 
 app.use(morgan('common'));
