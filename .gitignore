@@ -3,3 +3,4 @@ node_modules/
 forks/
 private/
 .DS_Store
+.env

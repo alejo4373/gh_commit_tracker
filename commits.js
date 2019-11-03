@@ -1,14 +1,16 @@
 const axios = require('axios');
 const API_URL = 'https://api.github.com';
 const fellowsGHUsernames = require('./fellows_gh_usernames');
+const utils = require('./utils');
 
 const usersCommitsMap = {
   //username: [] Commits array
 }
 
 const getUserEvents = async (username) => {
+  let url = utils.authorizeURL(`${API_URL}/users/${username}/events`)
   try {
-    let { data } = await axios.get(`${API_URL}/users/${username}/events`)
+    let { data } = await axios.get(url)
     return data;
   } catch (err) {
     console.log('ERROR =>', err)
