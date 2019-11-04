@@ -1,0 +1,3 @@
+[submodule "gh_commit_tracker_client"]
+	path = gh_commit_tracker_client
+	url = https://github.com/alejo4373/gh_commit_tracker_client
