@@ -14,7 +14,7 @@ app.use((req, res, next) => {
   next();
 })
 
-app.use(express.static(path.join(__dirname, './client/build')))
+app.use(express.static(path.join(__dirname, './gh_commit_tracker_client/build')))
 
 app.get('/commits', async (req, res) => {
   const lastPushedCommits = await getClassCommits();
@@ -28,7 +28,7 @@ app.get('/commits', async (req, res) => {
 })
 
 app.use('*', (req, res) => {
-  res.sendFile(path.join(__dirname, './client/build/index.html'))
+  res.sendFile(path.join(__dirname, './gh_commit_tracker_client/build/index.html'))
 })
 
 app.use((err, req, res, next) => {
