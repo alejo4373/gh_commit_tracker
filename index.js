@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const path = require('path');
 const { getClassCommits, sortCommitsByPushedDate } = require('./commits')
 
 const PORT = process.env.PORT || 3100;
@@ -13,6 +14,8 @@ app.use((req, res, next) => {
   next();
 })
 
+app.use(express.static(path.join(__dirname, './client/build')))
+
 app.get('/commits', async (req, res) => {
   const lastPushedCommits = await getClassCommits();
 
@@ -25,10 +28,7 @@ app.get('/commits', async (req, res) => {
 })
 
 app.use('*', (req, res) => {
-  res.status(404).json({
-    message: "Not Found",
-    payload: null
-  })
+  res.sendFile(path.join(__dirname, './client/build/index.html'))
 })
 
 app.use((err, req, res, next) => {
